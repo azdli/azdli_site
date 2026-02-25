@@ -24,6 +24,18 @@
             --card-bg: #FFFFFF;
         }
 
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1A1A18;
+                --text: #E8E8E4;
+                --text-secondary: #9A9A92;
+                --accent: #5ADB7A;
+                --accent-hover: #6BEB8A;
+                --border: #2E2E2A;
+                --card-bg: #222220;
+            }
+        }
+
         body {
             font-family: 'DM Sans', sans-serif;
             background-color: var(--bg);
@@ -38,7 +50,7 @@
         }
 
         .container {
-            max-width: 680px;
+            max-width: 480px;
             width: 100%;
             opacity: 0;
             animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
