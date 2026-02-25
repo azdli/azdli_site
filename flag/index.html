@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>???</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --term-bg: #0C0C0C;
+            --term-text: #C0C0C0;
+            --term-green: #4ADE80;
+            --term-dim: #4A4A4A;
+            --term-cyan: #67E8F9;
+            --term-amber: #FCD34D;
+            --term-red: #F87171;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--term-bg);
+            color: var(--term-text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .terminal {
+            max-width: 660px;
+            width: 100%;
+            background: #111111;
+            border-radius: 10px;
+            border: 1px solid #222;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03),
+                0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 18px;
+            background: #1A1A1A;
+            border-bottom: 1px solid #222;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #FF5F57; }
+        .dot.yellow { background: #FEBC2E; }
+        .dot.green { background: #28C840; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--term-dim);
+            letter-spacing: 0.05em;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            min-height: 300px;
+            cursor: text;
+        }
+
+        .output-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .prompt {
+            color: var(--term-green);
+        }
+
+        .cmd {
+            color: #E4E4E4;
+        }
+
+        .comment {
+            color: var(--term-dim);
+            font-style: italic;
+        }
+
+        .flag-value {
+            color: var(--term-cyan);
+            font-weight: 500;
+        }
+
+        .highlight {
+            color: var(--term-amber);
+        }
+
+        .error {
+            color: var(--term-red);
+        }
+
+        .file-listing {
+            color: var(--term-cyan);
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-line .prompt-prefix {
+            color: var(--term-green);
+            white-space: nowrap;
+        }
+
+        .input-line .colon {
+            color: #E4E4E4;
+        }
+
+        #command-input {
+            background: none;
+            border: none;
+            color: #E4E4E4;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            flex: 1;
+            caret-color: var(--term-green);
+            line-height: 1.8;
+        }
+
+        .motd {
+            opacity: 0;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .motd:nth-child(1) { animation-delay: 0.2s; }
+        .motd:nth-child(2) { animation-delay: 0.5s; }
+        .motd:nth-child(3) { animation-delay: 0.8s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 1rem; }
+            .terminal-body {
+                font-size: 0.75rem;
+                padding: 1rem;
+            }
+            #command-input {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="terminal-title">bash — 80×24</span>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+            <div class="output-line motd"><span class="comment"># Well, well, well... looks like someone is poking around.</span></div>
+            <div class="output-line motd"><span class="comment"># Curiosity is a good trait in this field.</span></div>
+            <div class="output-line motd"><span class="comment"># Type <span style="color: var(--term-text); font-style: normal;">help</span> if you need a hint.</span></div>
+            <div class="output-line" style="height: 0.8rem;"></div>
+            <div class="input-line">
+                <span class="prompt-prefix">visitor@site</span><span class="colon">:~$ </span>
+                <input type="text" id="command-input" autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const terminalBody = document.getElementById('terminal-body');
+        const commandInput = document.getElementById('command-input');
+        const commandHistory = [];
+        let historyIndex = -1;
+
+        // Click anywhere in terminal to focus input
+        terminalBody.addEventListener('click', () => commandInput.focus());
+
+        const fileSystem = {
+            'flag.txt': () => `\n<span class="highlight">🚩 Congratulations!</span>\n\n<span class="flag-value">flag{c0ngr4t5_0n_f1nd1ng_th1s_p4g3}</span>\n`,
+            'readme.txt': () => `<span class="comment">Nothing to see here...</span>`,
+
+        };
+
+        const commands = {
+            'help': () =>
+                `<span class="comment">Available commands:</span>\n` +
+                `  <span class="cmd">ls</span>           list files\n` +
+                `  <span class="cmd">cat [file]</span>   read a file\n` +
+                `  <span class="cmd">whoami</span>       who are you?\n` +
+                `  <span class="cmd">pwd</span>          print working directory\n` +
+                `  <span class="cmd">clear</span>        clear the terminal\n` +
+                `  <span class="cmd">help</span>         show this message`,
+
+            'ls': () =>
+                `<span class="file-listing">flag.txt</span>    <span class="file-listing">readme.txt</span>`,
+
+            'whoami': () =>
+                `<span class="cmd">visitor</span>\n<span class="comment"># But the real question is... how did you get here?</span>`,
+
+            'pwd': () => `/home/visitor`,
+
+            'id': () => `uid=1000(visitor) gid=1000(visitor) groups=1000(visitor)`,
+
+            'uname': () => `Linux`,
+            'uname -a': () => `Linux site 6.1.0-ctf #1 SMP x86_64 GNU/Linux`,
+
+            'date': () => new Date().toString(),
+
+            'echo': (args) => args || '',
+
+            'sudo': () => `<span class="error">visitor is not in the sudoers file. This incident will be reported.</span>`,
+
+            'rm': () => `<span class="error">rm: permission denied. Nice try.</span>`,
+
+            'exit': () => `<span class="comment">There is no escape.</span>`,
+
+            'cd': () => `<span class="comment">You're not going anywhere.</span>`,
+
+            'clear': () => '__CLEAR__',
+        };
+
+        function handleCat(args) {
+            if (!args) return `<span class="error">cat: missing file operand</span>`;
+            const filename = args.trim();
+            if (fileSystem[filename]) return fileSystem[filename]();
+            return `<span class="error">cat: ${filename}: No such file or directory</span>`;
+        }
+
+        function processCommand(input) {
+            const trimmed = input.trim();
+            if (!trimmed) return '';
+
+            const parts = trimmed.split(/\s+/);
+            const cmd = parts[0].toLowerCase();
+            const args = parts.slice(1).join(' ');
+
+            // Check for exact multi-word commands first (like "ls -la")
+            if (commands[trimmed]) return commands[trimmed]();
+            if (commands[trimmed.toLowerCase()]) return commands[trimmed.toLowerCase()]();
+
+            if (cmd === 'cat') return handleCat(args);
+            if (cmd === 'echo') return commands['echo'](args);
+            if (cmd === 'sudo') return commands['sudo']();
+            if (cmd === 'rm') return commands['rm']();
+            if (commands[cmd]) return commands[cmd]();
+
+            return `<span class="error">bash: ${parts[0]}: command not found</span>`;
+        }
+
+        function addOutputLine(html) {
+            const div = document.createElement('div');
+            div.className = 'output-line';
+            div.innerHTML = html;
+            const inputLine = terminalBody.querySelector('.input-line');
+            terminalBody.insertBefore(div, inputLine);
+        }
+
+        function scrollToBottom() {
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        commandInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const input = commandInput.value;
+                commandInput.value = '';
+
+                if (input.trim()) {
+                    commandHistory.unshift(input);
+                    historyIndex = -1;
+                }
+
+                // Show the entered command as a frozen line
+                addOutputLine(
+                    `<span class="prompt">visitor@site</span><span class="cmd">:~$ </span><span class="cmd">${input}</span>`
+                );
+
+                const result = processCommand(input);
+
+                if (result === '__CLEAR__') {
+                    // Remove everything except the input line
+                    const lines = terminalBody.querySelectorAll('.output-line, .motd');
+                    lines.forEach(l => l.remove());
+                } else if (result) {
+                    addOutputLine(result);
+                }
+
+                // Add spacing
+                addOutputLine('<span style="display:block; height: 0.3rem;"></span>');
+
+                scrollToBottom();
+
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (commandHistory.length > 0 && historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    commandInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    commandInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = -1;
+                    commandInput.value = '';
+                }
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                const partial = commandInput.value.trim();
+                const parts = partial.split(/\s+/);
+                if (parts[0] === 'cat' && parts.length === 2) {
+                    const prefix = parts[1];
+                    const matches = Object.keys(fileSystem).filter(f => f.startsWith(prefix));
+                    if (matches.length === 1) {
+                        commandInput.value = `cat ${matches[0]}`;
+                    }
+                }
+            }
+        });
+
+        // Keep focus on input
+        document.addEventListener('keydown', (e) => {
+            if (e.target !== commandInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                commandInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>
