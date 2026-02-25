@@ -247,7 +247,7 @@
             const cols = Math.floor(body.clientWidth / charWidth);
             const rows = Math.floor(body.clientHeight / charHeight);
             document.querySelector('.terminal-title').textContent = `bash — ${cols}×${rows}`;
-}
+        }
 
         function handleCat(args) {
             if (!args) return `<span class="error">cat: missing file operand</span>`;
