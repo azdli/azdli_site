@@ -175,13 +175,13 @@
             <span class="dot red"></span>
             <span class="dot yellow"></span>
             <span class="dot green"></span>
-            <span class="terminal-title">bash — 80×24</span>
+            <span class="terminal-title">bash</span>
         </div>
         <div class="terminal-body" id="terminal-body">
             <div class="output-line motd"><span class="comment"># Well, well, well... looks like someone is poking around.</span></div>
             <div class="output-line" style="height: 0.8rem;"></div>
             <div class="input-line">
-                <span class="prompt-prefix">visitor@site</span><span class="colon">:~$ </span>
+                <span class="prompt-prefix">visitor@azdli</span><span class="colon">:~$ </span>
                 <input type="text" id="command-input" autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
         </div>
@@ -239,16 +239,7 @@
 
             'clear': () => '__CLEAR__',
         };
-
-        function updateTerminalSize() {
-            const body = document.getElementById('terminal-body');
-            const charWidth = 8.5;
-            const charHeight = 20;
-            const cols = Math.floor(body.clientWidth / charWidth);
-            const rows = Math.floor(body.clientHeight / charHeight);
-            document.querySelector('.terminal-title').textContent = `bash — ${cols}×${rows}`;
-        }
-
+        
         function handleCat(args) {
             if (!args) return `<span class="error">cat: missing file operand</span>`;
             const filename = args.trim();
@@ -301,7 +292,7 @@
 
                 // Show the entered command as a frozen line
                 addOutputLine(
-                    `<span class="prompt">visitor@site</span><span class="cmd">:~$ </span><span class="cmd">${input}</span>`
+                    `<span class="prompt">visitor@azdli</span><span class="cmd">:~$ </span><span class="cmd">${input}</span>`
                 );
 
                 const result = processCommand(input);
