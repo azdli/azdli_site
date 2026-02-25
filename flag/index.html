@@ -240,6 +240,15 @@
             'clear': () => '__CLEAR__',
         };
 
+        function updateTerminalSize() {
+            const body = document.getElementById('terminal-body');
+            const charWidth = 8.5;
+            const charHeight = 20;
+            const cols = Math.floor(body.clientWidth / charWidth);
+            const rows = Math.floor(body.clientHeight / charHeight);
+            document.querySelector('.terminal-title').textContent = `bash — ${cols}×${rows}`;
+}
+
         function handleCat(args) {
             if (!args) return `<span class="error">cat: missing file operand</span>`;
             const filename = args.trim();
